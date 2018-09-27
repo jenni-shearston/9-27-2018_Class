@@ -1,5 +1,5 @@
 ---
-title: "9-27-2018_Class"
+title: "9-27-2018_Class - Visualization and EDA 1"
 author: "J Shearston"
 date: "September 27, 2018"
 output: 
@@ -10,5 +10,125 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(ggridges)
 ```
+
+## Pulling in the NOAA data
+
+```{r pulling noaa data, cache=TRUE}
+library(rnoaa)
+
+weather_df = 
+  rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
+                      var = c("PRCP", "TMIN", "TMAX"), 
+                      date_min = "2017-01-01",
+                      date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY", 
+                      USC00519397 = "Waikiki_HA",
+                      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+weather_df
+```
+
+## Start with those plots!
+
+
+### Scatterplots
+
+####Step 1: Define data (x and y)
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax))
+```
+
+####Step 2: Add a geom to define what I want to show
+
+Two ways to code a basic scatterplot, one using a pipe.
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point()
+
+#or
+
+weather_df %>%
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+
+```
+
+You can save the plot as an object so that you can modify it and play around with it later.
+
+```{r}
+plot_weather = 
+  weather_df %>%
+  ggplot(aes(x = tmin, y = tmax)) 
+
+plot_weather + geom_point()
+```
+
+*Check -- "plot_weather" is now in the Environment*
+
+
+####Step 3: Adding fun details, like color and lines
+
+Using the color aesthetic (an aesthetic is part of your data, so in this chunk of code "name" is a variable)
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name))
+```
+
+Adding a smooth curve (geom_smooth) and making the points semi-transparent (alpha). 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  geom_smooth(se = FALSE)
+```
+
+*Notes: 1) "alpha" is not currently an aesthetic; it doesn't include data but rather alters the appearance of the already present data. 2) "se" is standard error bands*
+
+A bit more on aesthetics...
+*The location of the color aesthetic in the code chunk matters. Becuase the color aesthetic has now been moved to the first line, it applies to the entire plot rather than to only the geom_point. Thus, we now have three geometric lines, because the geom_smooth function is applied to the entire plot, and not to a geom_point* 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE)
+```
+
+Adding a facet_grid to split out plots by a variable
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name)
+```
+
+Switching up the data & adding a size aesthetic
+
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_point(aes(size = prcp), alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name)
+```
+
+### Learning Assessment 1
+
+Write a code chain that starts with weather_df; focuses only on Central Park, converts temperatures to Fahrenheit, makes a scatterplot of min vs. max temperature, and overlays a linear regression line (using options in  geom_smooth()).
+
+```{r}
+
+```
+
+
+### Other Plots
+
+#### 
 
