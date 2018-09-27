@@ -7,6 +7,9 @@ output:
     toc: true
 ---
 
+This R Markdown is a tutorial on ggplots, including different types of plots and some neat options.
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
@@ -124,11 +127,133 @@ ggplot(weather_df, aes(x = date, y = tmax, color = name)) +
 Write a code chain that starts with weather_df; focuses only on Central Park, converts temperatures to Fahrenheit, makes a scatterplot of min vs. max temperature, and overlays a linear regression line (using options in  geom_smooth()).
 
 ```{r}
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>%
+  mutate(
+    tmax_F = tmax * 1.8 + 32,
+    tmin_F = tmin * 1.8 + 32) %>% 
+  ggplot(aes(x = tmin_F, y = tmax_F)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
 
 ```
 
 
 ### Other Plots
 
-#### 
+#### Scatter-ish plots
+
+Plot with a fitted line
+
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_smooth(se = FALSE) 
+```
+
+geom_hex plot and other ways to avoid overplotting
+
+```{r}
+library(hexbin)
+
+ggplot(weather_df, aes(x = tmax, y = tmin)) + 
+  geom_hex()
+
+ggplot(weather_df, aes(x = tmax, y = tmin)) + 
+  geom_bin2d()
+
+ggplot(weather_df, aes(x = tmax, y = tmin)) + 
+  geom_density2d()
+
+```
+
+
+#### Univariate plots
+
+Histograms
+
+```{r}
+ggplot(weather_df, aes(x = tmax)) + 
+  geom_histogram()
+```
+
+Adjusting histograms - bin width, fill, and "dodge"
+
+```{r}
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_histogram(position = "dodge", binwidth = 2)
+```
+
+Density plot
+
+```{r}
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_density(alpha = .4, adjust = .5, color = "blue")
+```
+
+*Notes: `Adjust` is similar to `binwidth`, `color` is the outline of each shape.*
+
+Box plot
+
+```{r}
+ggplot(weather_df, aes(x = name, y = tmax)) + 
+  geom_boxplot()
+```
+
+Violin plot
+
+```{r}
+ggplot(weather_df, aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  stat_summary(fun.y = median, geom = "point", color = "blue", size = 4)
+```
+
+Ridge plot
+
+```{r}
+ggplot(weather_df, aes(x = tmax, y = name)) + 
+  geom_density_ridges(scale = .85)
+```
+
+
+### Learning Assessment 3 (skipped 2)
+
+*Question*
+
+Make plots that compare precipitation across locations. Try a histogram, a density plot, a boxplot, a violin plot, and a ridgeplot; use aesthetic mappings to make your figure readable.
+
+*Solution*
+
+First a density plot:
+
+```{r}
+ggplot(weather_df, aes(x = prcp)) + 
+  geom_density(aes(fill = name), alpha = .5) 
+```
+
+Next a ridge plot:
+
+```{r}
+ggplot(weather_df, aes(x = prcp, y = name)) + 
+  geom_density_ridges(scale = .85)
+```
+
+Last a boxplot:
+
+```{r}
+ggplot(weather_df, aes(y = prcp, x = name)) + 
+  geom_boxplot() 
+  
+```
+
+This is a tough variable to plot because of the highly skewed distribution in each location. Of these, I’d probably choose the boxplot because it shows the outliers most clearly. If the “bulk” of the data were interesting, I’d probably compliment this with a plot showing data for all precipitation less than 100, or for a data omitting days with no precipitation.
+
+```{r}
+weather_df %>% 
+  filter(prcp > 0) %>% 
+  ggplot(aes(x = prcp, y = name)) + 
+  geom_density_ridges(scale = .85)
+```
+
+
+## Saving and Embedding Plots
 
