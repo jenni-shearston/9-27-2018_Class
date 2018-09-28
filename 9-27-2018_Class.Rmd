@@ -11,7 +11,13 @@ This R Markdown is a tutorial on ggplots, including different types of plots and
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
 library(tidyverse)
 library(ggridges)
 ```
@@ -256,4 +262,29 @@ weather_df %>%
 
 
 ## Saving and Embedding Plots
+
+Using `ggsave`
+
+```{r}
+weather_plot = ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) 
+
+ggsave("weather_plot.pdf", weather_plot, width = 8, height = 5)
+```
+
+Things to know:
+
+* Figure size in R is controlled by `fig.width`, `fig.height`, and  `fig.asp`. Jeff prefer's a common width and plots that are a little wider than they are tall, so he sets options to fig.width = 6 and  fig.asp = .6
+
+* Figure size inserted into output document is controlled by `out.width` or `out.height`. Jeff likes to have a little padding around the sides of his figures, so he sets out.width = "90%"
+
+* You can set all this using `knitr` at the beginning of the markdown document...but also included just below.
+
+```{r}
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+```
 
